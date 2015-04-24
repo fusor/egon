@@ -1,7 +1,6 @@
 # coding: utf-8
 require File.expand_path('../lib/egon/version', __FILE__)
 require 'date'
-# require 'egon/version'
 
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
