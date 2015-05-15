@@ -1,3 +1,5 @@
+require_relative 'image'
+
 module Overcloud
   module Flavor
 
