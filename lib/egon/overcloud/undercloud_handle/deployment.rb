@@ -11,7 +11,7 @@ module Overcloud
     
     def edit_plan_deployment_role_count(plan_name, role_name, count)
       parameter = {"name" => role_name + "-1::count", "value" => count.to_s}
-      edit_plan_parameters(plan_name, [count_parameter])
+      edit_plan_parameters(plan_name, [parameter])
     end
     
     def edit_plan_deployment_role_image(plan_name, role_name, image_uuid)
@@ -24,7 +24,8 @@ module Overcloud
       edit_plan_parameters(plan_name, [parameter])
     end
     
-    def deploy_plan(plan)
+    def deploy_plan(plan_name)
+      plan = get_plan(plan_name)
       stack_parameters = {
         :stack_name => plan.name,
         :template => plan.master_template,
