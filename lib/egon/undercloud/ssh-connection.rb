@@ -1,4 +1,5 @@
 require 'net/ssh'
+require 'stringio'
 
 # TODO: Remove this class when this branch is merged,
 # https://github.com/fusor/fusor/blob/deploy-cfme/server/app/lib/utils/fusor/command_utils.rb,
@@ -28,7 +29,7 @@ module Egon
         @on_failure = hook
       end
     
-      def execute(commands)
+      def execute(commands, stringio = nil)
         begin
           # :timeout => how long to wait for the initial connection to be made
           Net::SSH.start(@host, @user, :password => @password, :timeout => 2,
@@ -49,12 +50,14 @@ module Egon
       
                 # "on_data" is called when the process writes something to stdout
                 ch.on_data do |c, data|
-                  $stdout.print data
+                  $stdout.print data if stringio.nil?
+                  stringio.puts data unless stringio.nil?
                 end
       
                 # "on_extended_data" is called when the process writes something to stderr
                 ch.on_extended_data do |c, type, data|
-                  $stderr.print data
+                  $stderr.print data if stringio.nil?
+                  stringio.puts data unless stringio.nil?
                   call_failure
                 end
       
@@ -64,12 +67,14 @@ module Egon
       
             channel.wait
           end
+          call_complete
         rescue Exception => e
           puts e.message
           puts e.backtrace.inspect
           call_failure
           call_complete
-          e.message
+          stringio.puts e.message unless stringio.nil?
+          e.message if stringio.nil?
         end
       end
     end
