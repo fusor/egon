@@ -19,11 +19,11 @@ module Overcloud
     end
 
     def get_flavor_extra_specs(flavor_id)
-      get_flavor(flavor_id).extra_specs
+      get_flavor(flavor_id).metadata
     end
 
     def create_flavor_extra_specs(flavor_id, extra_specs)
-      get_flavor(flavor_id).create_extra_specs(extra_specs)
+      get_flavor(flavor_id).create_metadata(extra_specs)
     end
         
     def create_flavor_from_node(node)
@@ -55,7 +55,7 @@ module Overcloud
         if flavor.ram == flavor_parameters[:ram].to_i &&
             flavor.vcpus == flavor_parameters[:vcpus].to_i &&
             flavor.disk == flavor_parameters[:disk].to_i &&
-            flavor.extra_specs['cpu_arch'] == flavor_parameters[:extra_specs][:cpu_arch]
+            flavor.metadata['cpu_arch'] == flavor_parameters[:extra_specs][:cpu_arch]
           return true
         end
       end
