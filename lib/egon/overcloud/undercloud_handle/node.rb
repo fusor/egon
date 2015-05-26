@@ -32,8 +32,8 @@ module Overcloud
             :ssh_username => node_data[6],
             :ssh_key_contents => node_data[7],
             :ssh_virt_type => 'virsh',
-            :pxe_deploy_kernel => get_baremetal_deploy_kernel_image.id,
-            :pxe_deploy_ramdisk => get_baremetal_deploy_ramdisk_image.id
+            :deploy_kernel => get_baremetal_deploy_kernel_image.id,
+            :deploy_ramdisk => get_baremetal_deploy_ramdisk_image.id
           }
         elsif driver == 'pxe_ipmitool'
           driver_info = {
@@ -55,6 +55,7 @@ module Overcloud
             :memory_mb => memory_mb,
             :local_gb => local_gb,
             :cpu_arch => cpu_arch,
+            :capabilities => 'boot_option:local'
           }
         }
         node = create_node(node_parameters, create_flavor)
