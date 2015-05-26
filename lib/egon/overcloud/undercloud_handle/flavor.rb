@@ -40,6 +40,7 @@ module Overcloud
         :is_public => true,
         :extra_specs => {
           :cpu_arch => cpu_arch,
+          :'capabilities:boot_option' => 'local',
           :'baremetal:deploy_kernel_id' => get_baremetal_deploy_kernel_image.id,
           :'baremetal:deploy_ramdisk_id' => get_baremetal_deploy_ramdisk_image.id
         }
