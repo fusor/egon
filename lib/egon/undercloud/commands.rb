@@ -6,8 +6,9 @@ module Egon
       def self.OSP7_satellite(satellite_url, org, activation_key)
         return "
         curl -k -O #{satellite_url}/pub/katello-ca-consumer-latest.noarch.rpm
-        yum install -y katello-ca-consumer-latest.noarch.rpm
-        subscription-manager register --org=\"#{org}\" --activationkey=\"#{activation_key}\"
+        sudo yum install -y katello-ca-consumer-latest.noarch.rpm
+        sudo subscription-manager register --org=\"#{org}\" --activationkey=\"#{activation_key}\"
+        sudo yum clean all
         #{OSP7_COMMON}"
       end
     
@@ -26,11 +27,12 @@ module Egon
       end
     
       OSP7_COMMON = "
+      sudo yum install -y http://mirrors.einstein.yu.edu/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
       sudo yum install -y https://rdoproject.org/repos/openstack-kilo/rdo-release-kilo.rpm
       sudo curl -o /etc/yum.repos.d/rdo-management-trunk.repo http://trunk-mgt.rdoproject.org/centos-kilo/current-passed-ci/delorean-rdo-management.repo
       sudo yum install -y python-rdomanager-oscplugin
       # TODO: answers file should come from RHCI
-      cp /usr/share/instack-undercloud/instack.answers.sample ~/instack.answers;
+      cp -f /usr/share/instack-undercloud/undercloud.conf.sample ~/undercloud.conf;
       # TODO: for baremetal a nodes.csv file may also be required
       openstack undercloud install
       sudo cp /root/tripleo-undercloud-passwords .
