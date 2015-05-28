@@ -1,5 +1,6 @@
 require_relative 'flavor'
 require 'csv'
+require 'timeout'
 
 module Overcloud
   module Node
@@ -10,7 +11,20 @@ module Overcloud
     
     def create_node(node_parameters, create_flavor = false)
       node = service('Baremetal').nodes.create(node_parameters)
+      create_port({:node_uuid => node.uuid, :address => node_parameters[:address]})
+
       create_flavor_from_node(node) if create_flavor
+
+      node.set_provision_state('manage')
+      introspect_node(node)     
+      Thread.new {
+        timeout(900) {
+          while not introspect_node_status(node) do
+            sleep(15)
+          end
+          node.set_provision_state('provide')
+        }
+      }
       node
     end
 
@@ -32,8 +46,8 @@ module Overcloud
             :ssh_username => node_data[6],
             :ssh_key_contents => node_data[7],
             :ssh_virt_type => 'virsh',
-            :pxe_deploy_kernel => get_baremetal_deploy_kernel_image.id,
-            :pxe_deploy_ramdisk => get_baremetal_deploy_ramdisk_image.id
+            :deploy_kernel => get_baremetal_deploy_kernel_image.id,
+            :deploy_ramdisk => get_baremetal_deploy_ramdisk_image.id
           }
         elsif driver == 'pxe_ipmitool'
           driver_info = {
@@ -55,11 +69,41 @@ module Overcloud
             :memory_mb => memory_mb,
             :local_gb => local_gb,
             :cpu_arch => cpu_arch,
-          }
+            :capabilities => 'boot_option:local'
+          },
+          :address => mac_address
         }
         node = create_node(node_parameters, create_flavor)
-        create_port({:node_uuid => node.uuid, :address => mac_address})
       end
     end
+
+    ## THESE METHODS ARE TEMPORARY UNTIL IRONIC-DISCOVERD IS ADDED TO
+    ## OPENSTACK AND KEYSTONE
+
+    def introspect_node(node)
+      uri = "http://#{@auth_url}:5050/v1/introspection/#{node.uuid}"
+      auth_token = service('Baremetal').instance_variable_get(:@auth_token)
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 202,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'POST'
+          })      
+    end
+
+    def introspect_node_status(node)
+      uri = "http://#{@auth_url}:5050/v1/introspection/#{node.uuid}"
+      auth_token = service('Baremetal').instance_variable_get(:@auth_token)
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'GET'
+          })
+      Fog::JSON.decode(response.body)['finished']
+    end
+
   end
 end
