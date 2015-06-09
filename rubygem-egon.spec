@@ -75,7 +75,7 @@ This package contains documentation for rubygem-%{gem_name}.
 %setup -n %{pkg_name}-%{version} -q -c -T
 mkdir -p .%{gem_dir}
 %{?scl:scl enable %{scl} "}
-gem install --local --install-dir .%{gem_dir} --force %{SOURCE0}
+gem install --local --install-dir .%{gem_dir} --bindir .%{_bindir} --force %{SOURCE0}
 %{?scl:"}
 
 %build
@@ -91,6 +91,12 @@ cat <<GEMFILE > %{buildroot}%{foreman_bundlerd_dir}/%{gem_name}.rb
 gem '%{gem_name}'
 GEMFILE
 
+mkdir -p %{buildroot}%{_bindir}
+cp -a .%{_bindir}/* \
+        %{buildroot}%{_bindir}/
+
+find %{buildroot}%{gem_instdir}/bin -type f | xargs chmod a+x
+
 mkdir -p %{buildroot}%{foreman_pluginconf_dir}
 # TODO: Do we need this guy?
 #cp -a %{buildroot}/%{gem_instdir}/config/egon.yaml %{buildroot}%{foreman_pluginconf_dir}/
@@ -100,6 +106,9 @@ mkdir -p %{buildroot}%{foreman_pluginconf_dir}
 
 %files
 %defattr(-, root, root)
+%{_bindir}/undercloud-install-vanilla-rhel.rb
+%{_bindir}/undercloud-install-satellite.rb
+%{_bindir}/undercloud-install-instack-virt.rb
 %{gem_instdir}/
 %exclude %{gem_cache}
 %{gem_spec}
