@@ -27,7 +27,7 @@ module Egon
       end
     
       OSP7_COMMON = "
-      sudo yum install -y http://mirrors.einstein.yu.edu/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+      sudo yum install -y http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
       sudo yum install -y https://rdoproject.org/repos/openstack-kilo/rdo-release-kilo.rpm
       sudo curl -o /etc/yum.repos.d/rdo-management-trunk.repo http://trunk-mgt.rdoproject.org/centos-kilo/current-passed-ci/delorean-rdo-management.repo
       sudo yum install -y python-rdomanager-oscplugin
