@@ -12,3 +12,4 @@ installer.install(Egon::Undercloud::Commands.OSP7_instack_virt)
 while !installer.completed?
   sleep 1
 end  
+installer.check_ports
