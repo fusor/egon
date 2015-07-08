@@ -16,3 +16,4 @@ installer.install(Egon::Undercloud::Commands.OSP7_vanilla_rhel(RHSM_USER, RHSM_P
 while !installer.completed?
   sleep 1
 end  
+installer.check_ports

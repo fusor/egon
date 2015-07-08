@@ -18,3 +18,4 @@ installer.install(Egon::Undercloud::Commands.OSP7_satellite(SATELLITE_URL, SATEL
 while !installer.completed?
   sleep 1
 end  
+installer.check_ports

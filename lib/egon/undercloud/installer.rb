@@ -38,6 +38,16 @@ module Egon
           @connection.execute(commands)
         }
       end
+
+      def check_ports
+        # closed ports 5385, 36357
+        ports = [8774, 9292, 8777, 9696, 8004, 5000, 8585, 5672]
+        ports.each do |p|
+          if !@connection.port_open?(p)
+            set_failure(true)
+          end
+        end
+      end
     end
   end
 end

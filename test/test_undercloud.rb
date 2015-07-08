@@ -40,6 +40,11 @@ describe "undercloud installer" do
   it "connection should timeout and installer indicate failure" do
     run_and_assert_installer(@installer, true)
   end
+
+  it "check ports should fail on mock connection" do
+    @installer.check_ports
+    expect(@installer.failure?).to be true
+  end
   
 end
   
