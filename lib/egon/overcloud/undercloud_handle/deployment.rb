@@ -27,13 +27,16 @@ module Overcloud
     def deploy_plan(plan_name)
       plan = get_plan(plan_name)
       templates = Hash[plan.provider_resource_templates]
+
       # temporary workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1212740
-      templates["manifests/overcloud_object.pp"] = templates["puppet/manifests/overcloud_object.pp"]
-      templates["manifests/ringbuilder.pp"] = templates["puppet/manifests/ringbuilder.pp"]
-      templates["manifests/overcloud_compute.pp"] = templates["puppet/manifests/overcloud_compute.pp"]
-      templates["manifests/overcloud_controller.pp"] = templates["puppet/manifests/overcloud_controller.pp"]
-      templates["manifests/overcloud_volume.pp"] = templates["puppet/manifests/overcloud_volume.pp"]
-      templates["manifests/overcloud_cephstorage.pp"] = templates["puppet/manifests/overcloud_cephstorage.pp"]
+      templates.keys.each do |template_path|
+        if template_path.index('puppet/') == 0
+          new_template_path = template_path.sub('puppet/','')
+          templates[new_template_path] = templates[template_path]
+        end
+      end
+      templates["hieradata/RedHat.yaml"] = templates["puppet/hieradata/RedHat.yaml"]
+      templates["yum_update.sh"] = templates["extraconfig/tasks/yum_update.sh"]
 
       stack_parameters = {
         :stack_name => plan.name,
