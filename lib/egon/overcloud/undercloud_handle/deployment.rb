@@ -25,6 +25,11 @@ module Overcloud
     end
 
     def deploy_plan(plan_name)
+      # ensure that nodes are in correct state
+      for node in list_nodes
+        node.set_provision_state('provide') if node.provision_state == 'manageable'
+      end
+
       plan = get_plan(plan_name)
       templates = Hash[plan.provider_resource_templates]
 

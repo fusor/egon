@@ -17,14 +17,6 @@ module Overcloud
 
       node.set_provision_state('manage')
       introspect_node(node)     
-      Thread.new {
-        timeout(900) {
-          while not introspect_node_status(node) do
-            sleep(15)
-          end
-          node.set_provision_state('provide')
-        }
-      }
       node
     end
 
