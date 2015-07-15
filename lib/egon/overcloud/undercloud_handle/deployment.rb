@@ -54,9 +54,13 @@ module Overcloud
       }
       service('Orchestration').stacks.new.save(stack_parameters)
     end
+
+    def list_stacks
+      service('Orchestration').stacks.all
+    end
     
-    def get_stack(stack_name)
-      service('Orchestration').stacks.get(stack_name)
+    def get_stack_by_name(stack_name)
+      list_stacks.find{|s| s.stack_name == stack_name}
     end
   
   end
