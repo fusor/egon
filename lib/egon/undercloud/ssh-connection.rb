@@ -1,4 +1,4 @@
-require 'curb'
+require 'net/http'
 require 'net/ssh'
 require 'stringio'
 
@@ -16,25 +16,31 @@ module Egon
 
       def port_open?(port, local_ip="127.0.0.1", remote_ip="192.0.2.1", seconds=1)
         t = Thread.new {
-          Net::SSH.start(@host, @user, :password => @password, :timeout => 2,
-                       :auth_methods => ["password"],
-                       :number_of_password_prompts => 0) do |session|
+          begin
+            Net::SSH.start(@host, @user, :password => @password, :timeout => seconds,
+                           :auth_methods => ["password"],
+                           :number_of_password_prompts => 0) do |session|
             puts "Forwarding #{port} #{remote_ip} #{port}"
             session.forward.local( port, remote_ip, port )
             session.loop { true }
+          end
+          rescue => e
+            puts e.message
           end
         }
 
         sleep 1
         begin
-          url = "#{local_ip}:#{port}"
+          url = "http://#{local_ip}:#{port}"
           puts "Testing #{url}"
-          http = Curl.get(url)
-          puts http.body_str
+          res = Net::HTTP.get_response(URI(url))
+          puts res.body
           puts "Port #{port} is open"
           t.kill
           true
-        rescue Curl::Err::GotNothingError, Curl::Err::ConnectionFailedError
+        rescue => e
+          puts e.message
+          puts e.backtrace
           puts "Port #{port} is closed"
           t.kill
           false
