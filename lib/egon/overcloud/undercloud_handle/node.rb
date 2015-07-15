@@ -16,7 +16,7 @@ module Overcloud
       create_flavor_from_node(node) if create_flavor
 
       node.set_provision_state('manage')
-      introspect_node(node)     
+      introspect_node(node.uuid)
       node
     end
 
@@ -72,8 +72,8 @@ module Overcloud
     ## THESE METHODS ARE TEMPORARY UNTIL IRONIC-DISCOVERD IS ADDED TO
     ## OPENSTACK AND KEYSTONE
 
-    def introspect_node(node)
-      uri = "http://#{@auth_url}:5050/v1/introspection/#{node.uuid}"
+    def introspect_node(node_uuid)
+      uri = "http://#{@auth_url}:5050/v1/introspection/#{node_uuid}"
       auth_token = service('Baremetal').instance_variable_get(:@auth_token)
       response = Fog::Core::Connection.new(uri, false).request({
             :expects => 202,
@@ -84,8 +84,8 @@ module Overcloud
           })      
     end
 
-    def introspect_node_status(node)
-      uri = "http://#{@auth_url}:5050/v1/introspection/#{node.uuid}"
+    def introspect_node_status(node_uuid)
+      uri = "http://#{@auth_url}:5050/v1/introspection/#{node_uuid}"
       auth_token = service('Baremetal').instance_variable_get(:@auth_token)
       response = Fog::Core::Connection.new(uri, false).request({
             :expects => 200,
