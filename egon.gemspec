@@ -26,5 +26,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency "fog", "~> 1.29.0"
   s.add_development_dependency "net-ssh", "~> 2.9.2"
   s.add_development_dependency "rspec", "~> 3.2.0"
-  s.add_development_dependency "curb", "~> 0.8.8"
 end
