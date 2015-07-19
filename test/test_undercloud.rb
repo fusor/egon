@@ -45,6 +45,18 @@ describe "undercloud installer" do
     @installer.check_ports
     expect(@installer.failure?).to be true
   end
-  
+
+  it "consume stdout and stderr from commands" do
+    io = StringIO.new
+    @installer.install("time", io)
+    while !@installer.completed?
+      sleep 1
+    end
+    expect(io.string).to include("execution expired")
+
+    io = StringIO.new
+    @installer.check_ports(io)
+    expect(io.string).to include("Testing")
+  end
 end
   

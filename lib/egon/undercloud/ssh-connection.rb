@@ -14,7 +14,12 @@ module Egon
         @password = password
       end
 
-      def port_open?(port, local_ip="127.0.0.1", remote_ip="192.0.2.1", seconds=1)
+      def stringio_write(stringio, text)
+        $stdout.puts text if stringio.nil?
+        stringio.puts text unless stringio.nil?
+      end
+
+      def port_open?(port, stringio=nil, local_ip="127.0.0.1", remote_ip="192.0.2.1", seconds=1)
         t = Thread.new {
           begin
             Net::SSH.start(@host, @user, :password => @password, :timeout => seconds,
@@ -25,23 +30,23 @@ module Egon
             session.loop { true }
           end
           rescue => e
-            puts e.message
+            stringio_write(stringio, e.message)
           end
         }
 
         sleep 1
         begin
           url = "http://#{local_ip}:#{port}"
-          puts "Testing #{url}"
+          stringio_write(stringio, "Testing #{url}")
           res = Net::HTTP.get_response(URI(url))
-          puts res.body
-          puts "Port #{port} is open"
+          stringio_write(stringio, res.body)
+          stringio_write(stringio, "Port #{port} is open")
           t.kill
           true
         rescue => e
-          puts e.message
-          puts e.backtrace
-          puts "Port #{port} is closed"
+          stringio_write(stringio, e.message)
+          stringio_write(stringio, e.backtrace)
+          stringio_write(stringio, "Port #{port} is closed")
           t.kill
           false
         end
@@ -84,14 +89,13 @@ module Egon
       
                 # "on_data" is called when the process writes something to stdout
                 ch.on_data do |c, data|
-                  $stdout.print data if stringio.nil?
-                  stringio.puts data unless stringio.nil?
+                  stringio_write(stringio, data)
                 end
       
                 # "on_extended_data" is called when the process writes something to stderr
                 ch.on_extended_data do |c, type, data|
                   $stderr.print data if stringio.nil?
-                  stringio.puts data unless stringio.nil?
+                  stringio_write(stringio, data)
                   call_failure
                 end
       
@@ -107,7 +111,7 @@ module Egon
           puts e.backtrace.inspect
           call_failure
           call_complete
-          stringio.puts e.message unless stringio.nil?
+          stringio_write(stringio, e.message)
           e.message if stringio.nil?
         end
       end
