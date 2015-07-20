@@ -27,7 +27,7 @@ module Egon
         @failure = bool
       end
     
-      def install(commands)
+      def install(commands, stringio=nil)
         @started = true
         @completed = false
              
@@ -35,15 +35,15 @@ module Egon
         @connection.on_failure(lambda { set_failure(true) })
     
         Thread.new {
-          @connection.execute(commands)
+          @connection.execute(commands, stringio)
         }
       end
 
-      def check_ports
+      def check_ports(stringio=nil)
         # closed ports 5385, 36357
         ports = [8774, 9292, 8777, 9696, 8004, 5000, 8585, 15672]
         ports.each do |p|
-          if !@connection.port_open?(p)
+          if !@connection.port_open?(p, stringio)
             set_failure(true)
           end
         end
