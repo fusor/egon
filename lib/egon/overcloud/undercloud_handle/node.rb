@@ -8,6 +8,10 @@ module Overcloud
     def list_nodes
       service('Baremetal').nodes.details
     end
+
+    def get_node(node_id)
+      service('Baremetal').nodes.find_by_uuid(node_id)
+    end
     
     def create_node(node_parameters, create_flavor = false)
       node = service('Baremetal').nodes.create(node_parameters)
