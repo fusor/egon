@@ -12,6 +12,6 @@ describe "SSHConnection" do
 
   it "check port is open" do
     connection = Egon::Undercloud::SSHConnection.new("127.0.0.1", "stack", "test")
-    connection.port_open?(1111).should eq false
+    connection.remote_port_open?(1111).should eq false
     end
 end

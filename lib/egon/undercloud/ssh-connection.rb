@@ -1,3 +1,4 @@
+require 'egon/undercloud/port-check-mixin'
 require 'net/http'
 require 'net/ssh'
 require 'stringio'
@@ -8,6 +9,8 @@ require 'stringio'
 module Egon
   module Undercloud
     class SSHConnection
+      include PortCheckMixin
+
       def initialize(host, user, password)
         @host = host
         @user = user
@@ -19,7 +22,7 @@ module Egon
         stringio.puts text unless stringio.nil?
       end
 
-      def port_open?(port, stringio=nil, local_ip="127.0.0.1", remote_ip="192.0.2.1", seconds=1)
+      def remote_port_open?(port, stringio=nil, local_ip="127.0.0.1", remote_ip="192.0.2.1", seconds=1)
         t = Thread.new {
           begin
             Net::SSH.start(@host, @user, :password => @password, :timeout => seconds,
@@ -35,39 +38,27 @@ module Egon
         }
 
         sleep 1
-        begin
-          url = "http://#{local_ip}:#{port}"
-          stringio_write(stringio, "Testing #{url}")
-          res = Net::HTTP.get_response(URI(url))
-          stringio_write(stringio, res.body)
-          stringio_write(stringio, "Port #{port} is open")
-          t.kill
-          true
-        rescue => e
-          stringio_write(stringio, e.message)
-          stringio_write(stringio, e.backtrace)
-          stringio_write(stringio, "Port #{port} is closed")
-          t.kill
-          false
-        end
+        port_status = port_open?(local_ip, port, stringio)
+        t.kill
+        port_status
       end
-    
+
       def call_complete
         @on_complete.call if @on_complete
       end
-        
+
       def on_complete(hook)
         @on_complete = hook
       end
-    
+
       def call_failure
         @on_failure.call if @on_failure
       end
-    
+
       def on_failure(hook)
         @on_failure = hook
       end
-    
+
       def execute(commands, stringio = nil)
         begin
           # :timeout => how long to wait for the initial connection to be made
@@ -86,23 +77,23 @@ module Egon
               end
               ch.exec commands do |ch, success|
                 call_failure unless success
-      
+
                 # "on_data" is called when the process writes something to stdout
                 ch.on_data do |c, data|
                   stringio_write(stringio, data)
                 end
-      
+
                 # "on_extended_data" is called when the process writes something to stderr
                 ch.on_extended_data do |c, type, data|
                   $stderr.print data if stringio.nil?
                   stringio_write(stringio, data)
                   call_failure
                 end
-      
+
                 ch.on_close { call_complete }
               end
             end
-      
+
             channel.wait
           end
           call_complete

@@ -59,4 +59,31 @@ describe "undercloud installer" do
     expect(io.string).to include("Testing")
   end
 end
-  
+
+describe "local installer" do
+
+  before do
+    @installer = Egon::Undercloud::Installer.new
+  end
+
+  it "local installer runs successfully" do
+    @installer.install("date")
+    while !@installer.completed?
+      sleep 1
+    end
+    expect(@installer.failure?).to be false
+
+    io = StringIO.new
+    @installer.check_ports(io)
+    expect(io.string).to include("Testing")
+  end
+
+  it "local install fails and is detected" do
+    @installer.install("blah")
+    while !@installer.completed?
+      sleep 1
+    end
+    expect(@installer.failure?).to be true
+  end
+
+end
