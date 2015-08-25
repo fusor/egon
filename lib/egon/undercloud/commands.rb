@@ -222,13 +222,9 @@ module Egon
       "
 
       OSP7_COMMON = "
-      sudo yum install -y http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-      sudo yum install -y https://rdoproject.org/repos/openstack-kilo/rdo-release-kilo.rpm
-      sudo curl -o /etc/yum.repos.d/rdo-management-trunk.repo http://trunk-mgt.rdoproject.org/centos-kilo/current-passed-ci/delorean-rdo-management.repo
       sudo yum install -y python-rdomanager-oscplugin
       # TODO: answers file should come from RHCI
       cp -f /usr/share/instack-undercloud/undercloud.conf.sample ~/undercloud.conf;
-      # TODO: for baremetal a nodes.csv file may also be required
       openstack undercloud install
       sudo cp /root/tripleo-undercloud-passwords .
       sudo chown $USER: tripleo-undercloud-passwords
