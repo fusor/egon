@@ -29,6 +29,7 @@ module Overcloud
         :openstack_auth_url => 'http://' + @auth_url + ':' + @port.to_s + '/v2.0/tokens',   
         :openstack_username => @username,
         :openstack_api_key  => @password,
+        :openstack_tenant   => @username,
       }
       
       if service_name == 'Planning'
