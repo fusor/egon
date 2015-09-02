@@ -1,112 +1,92 @@
-%{?scl:%scl_package rubygem-%{gem_name}}
-%{!?scl:%global pkg_name %{name}}
-
 %global gem_name egon
 
-%global foreman_dir /usr/share/foreman
-%global foreman_bundlerd_dir %{foreman_dir}/bundler.d
-%global foreman_pluginconf_dir %{foreman_dir}/config/settings.plugins.d
-
-%if !("%{?scl}" == "ruby193" || 0%{?rhel} > 6 || 0%{?fedora} > 16)
-%global gem_dir /usr/lib/ruby/gems/1.8
-%global gem_instdir %{gem_dir}/gems/%{gem_name}-%{version}
-%global gem_libdir %{gem_instdir}/lib
-%global gem_cache %{gem_dir}/cache/%{gem_name}-%{version}.gem
-%global gem_spec %{gem_dir}/specifications/%{gem_name}-%{version}.gemspec
-%global gem_docdir %{gem_dir}/doc/%{gem_name}-%{version}
-%endif
-
-%if "%{?scl}" == "ruby193"
-    %global scl_ruby /usr/bin/ruby193-ruby
-    %global scl_rake /usr/bin/ruby193-rake
-    ### TODO temp disabled for SCL
-    %global nodoc 1
-%else
-    %global scl_ruby /usr/bin/ruby
-    %global scl_rake /usr/bin/rake
-%endif
-
-Summary: Egon Plugin
-Name: %{?scl_prefix}rubygem-%{gem_name}
-
-Version: 0.0.1
-Release: 19%{dist}
-Group: Development/Ruby
-License: Distributable
+Name: rubygem-%{gem_name}
+Version: 0.4.1
+Release: 1%{?dist}
+Summary: A library on top of Fog that encapsulates TripleO deployment operations
+Group: Development/Languages
+License: GPL-3.0+
 URL: https://github.com/fusor/egon
-Source0: http://rubygems.org/downloads/%{gem_name}-%{version}.gem
-
-%if "%{?scl}" == "ruby193"
-Requires: %{?scl_prefix}ruby-wrapper
-BuildRequires: %{?scl_prefix}ruby-wrapper
-%endif
-%if "%{?scl}" == "ruby193" || 0%{?rhel} > 6 || 0%{?fedora} > 16
-BuildRequires:  %{?scl_prefix}rubygems-devel
-%endif
-
-%if 0%{?fedora} > 19
-Requires: %{?scl_prefix}ruby(release) = 2.0.0
-BuildRequires: %{?scl_prefix}ruby(release) = 2.0.0
-%else
-%if "%{?scl}" == "ruby193" || 0%{?rhel} > 6 || 0%{?fedora} > 16
-Requires: %{?scl_prefix}ruby(abi) = 1.9.1
-BuildRequires: %{?scl_prefix}ruby(abi) = 1.9.1
-%else
-Requires: ruby(abi) = 1.8
-BuildRequires: ruby(abi) = 1.8
-%endif
-%endif
-
+Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
+BuildRequires: ruby(release)
+BuildRequires: rubygems-devel
+BuildRequires: ruby
+BuildRequires: rubygem(fog) => 1.31.0
+BuildRequires: rubygem(fog) < 1.32
+BuildRequires: rubygem(net-ssh) => 2.9.2
+BuildRequires: rubygem(net-ssh) < 2.10
+BuildRequires: rubygem(rspec) => 3.2.0
+BuildRequires: rubygem(rspec) < 3.3
 BuildArch: noarch
-Provides: %{?scl_prefix}rubygem(egon) = %{version}
 
 %description
-Egon Plugin
+A library on top of Fog that encapsulates TripleO deployment operations.
+
 
 %package doc
-BuildArch:  noarch
-Requires:   %{?scl_prefix}%{pkg_name} = %{version}-%{release}
-Summary:    Documentation for rubygem-%{gem_name}
+Summary: Documentation for %{name}
+Group: Documentation
+Requires: %{name} = %{version}-%{release}
+BuildArch: noarch
 
 %description doc
-This package contains documentation for rubygem-%{gem_name}.
+Documentation for %{name}.
 
 %prep
-%setup -n %{pkg_name}-%{version} -q -c -T
-mkdir -p .%{gem_dir}
-%{?scl:scl enable %{scl} "}
-gem install --local --install-dir .%{gem_dir} --force %{SOURCE0}
-%{?scl:"}
+gem unpack %{SOURCE0}
+
+%setup -q -D -T -n  %{gem_name}-%{version}
+
+gem spec %{SOURCE0} -l --ruby > %{gem_name}.gemspec
 
 %build
+# Create the gem as gem install only works on a gem file
+gem build %{gem_name}.gemspec
+
+# %%gem_install compiles any C extensions and installs the gem into ./%%gem_dir
+# by default, so that we can move it into the buildroot in %%install
+%gem_install
 
 %install
-
 mkdir -p %{buildroot}%{gem_dir}
 cp -a .%{gem_dir}/* \
         %{buildroot}%{gem_dir}/
 
-mkdir -p %{buildroot}%{foreman_bundlerd_dir}
-cat <<GEMFILE > %{buildroot}%{foreman_bundlerd_dir}/%{gem_name}.rb
-gem '%{gem_name}'
-GEMFILE
 
-mkdir -p %{buildroot}%{foreman_pluginconf_dir}
-# TODO: Do we need this guy?
-#cp -a %{buildroot}/%{gem_instdir}/config/egon.yaml %{buildroot}%{foreman_pluginconf_dir}/
+mkdir -p %{buildroot}%{_bindir}
+cp -pa .%{_bindir}/* \
+        %{buildroot}%{_bindir}/
 
-%clean
-%{__rm} -rf %{buildroot}
+find %{buildroot}%{gem_instdir}/bin -type f | xargs chmod a+x
+
+# Run the test suite
+%check
+pushd .%{gem_instdir}
+
+popd
 
 %files
-%defattr(-, root, root)
-%{gem_instdir}/
+%dir %{gem_instdir}
+%{_bindir}/undercloud-install-local.rb
+%{_bindir}/undercloud-install-satellite.rb
+%{_bindir}/undercloud-install-vanilla-rhel.rb
+%exclude %{gem_instdir}/.gitignore
+%{gem_instdir}/.ruby-version
+%license %{gem_instdir}/LICENSE
+%{gem_instdir}/bin
+%{gem_libdir}
+%{gem_instdir}/rubygem-egon.spec
 %exclude %{gem_cache}
 %{gem_spec}
-%{foreman_bundlerd_dir}/%{gem_name}.rb
-#%{foreman_pluginconf_dir}/egon.yaml
 
 %files doc
-%{gem_dir}/doc/%{gem_name}-%{version}
+%doc %{gem_docdir}
+%{gem_instdir}/Gemfile
+%doc %{gem_instdir}/README.md
+%{gem_instdir}/Rakefile
+%{gem_instdir}/egon.gemspec
+%{gem_instdir}/test
 
 %changelog
+* Mon Aug 31 2015 jrist <jrist@redhat.com> - 0.4.1-1
+- Initial package
