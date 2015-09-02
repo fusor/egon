@@ -3,6 +3,9 @@
 
 %global gem_name egon
 
+%global foreman_dir /usr/share/foreman
+%global foreman_bundlerd_dir %{foreman_dir}/bundler.d
+
 Name: %{?scl_prefix}rubygem-%{gem_name}
 Version: 0.4.1
 Release: 1%{?dist}
@@ -65,6 +68,10 @@ mkdir -p %{buildroot}%{gem_dir}
 cp -a .%{gem_dir}/* \
         %{buildroot}%{gem_dir}/
 
+mkdir -p %{buildroot}%{foreman_bundlerd_dir}
+cat <<GEMFILE > %{buildroot}%{foreman_bundlerd_dir}/%{gem_name}.rb
+gem '%{gem_name}'
+GEMFILE
 
 mkdir -p %{buildroot}%{_bindir}
 cp -pa .%{_bindir}/* \
@@ -92,6 +99,7 @@ popd
 %{gem_instdir}/rubygem-egon.spec
 %exclude %{gem_cache}
 %{gem_spec}
+%{foreman_bundlerd_dir}/%{gem_name}.rb
 
 %files doc
 %doc %{gem_docdir}
