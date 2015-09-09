@@ -16,9 +16,10 @@ Gem::Specification.new do |s|
   s.date          = Date.today.to_s
   s.license       = 'GPL-3.0+'
 
-  s.files         = `git ls-files -z`.split("\x0")
-  s.executables   = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  s.test_files    = s.files.grep(%r{^(test|s|features)/})
+  s.files         = Dir['**/*']
+  s.test_files    = Dir['{test,spec,features}/**/*']
+  s.executables   = Dir['bin/*'].map{ |f| File.basename(f) }
+
   s.require_paths = ["lib"]
 
   s.add_development_dependency "bundler", "~> 1.7"
