@@ -105,6 +105,9 @@ mkdir -p %{buildroot}%{foreman_pluginconf_dir}
 %{gem_spec}
 %{foreman_bundlerd_dir}/%{gem_name}.rb
 #%{foreman_pluginconf_dir}/egon.yaml
+%{gem_dir}/bin/undercloud-install-local.rb
+%{gem_dir}/bin/undercloud-install-satellite.rb
+%{gem_dir}/bin/undercloud-install-vanilla-rhel.rb
 
 %files doc
 %{gem_dir}/doc/%{gem_name}-%{version}
