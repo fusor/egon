@@ -5,6 +5,16 @@ module Overcloud
       service('Planning').plans.find_by_name(plan_name)
     end
 
+    def get_plan_parameter_value(plan_name, parameter_name)
+      params = get_plan(plan_name).parameters
+      param = params.find{|param| param["name"] == parameter_name }
+      if param
+        param["value"]
+      else
+        nil
+      end
+    end
+
     def edit_plan_parameters(plan_name, parameters)
       get_plan(plan_name).patch(:parameters => parameters)
     end
@@ -25,15 +35,26 @@ module Overcloud
     end
 
     def deploy_plan(plan_name)
+      plan = get_plan(plan_name)
+
       # ensure that nodes are in correct state
       for node in list_nodes
         node.set_provision_state('provide') if node.provision_state == 'manageable'
       end
 
-      plan = get_plan(plan_name)
-      templates = Hash[plan.provider_resource_templates]
+      # assign all unassigned roles; make sure their count is 0
+      default_flavor = list_flavors[0]
+      for role in list_deployment_roles
+        flavor_parameter_name = role.name + "-1::Flavor"
+        flavor_parameter_value = get_plan_parameter_value(plan_name, flavor_parameter_name)
+        if flavor_parameter_value.to_s == ''
+          edit_plan_deployment_role_count(plan_name, role.name, 0)
+          edit_plan_deployment_role_flavor(plan_name, role.name, default_flavor.name)
+        end
+      end
 
       # temporary workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1212740
+      templates = Hash[plan.provider_resource_templates]
       templates.keys.each do |template_path|
         if template_path.index('puppet/') == 0
           new_template_path = template_path.sub('puppet/','')
