@@ -12,10 +12,10 @@ License: GPL-3.0+
 URL: https://github.com/fusor/egon
 Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
 BuildRequires: %{?scl_prefix}rubygems-devel
-BuildRequires: %{?scl_prefix}ruby
-BuildRequires: %{?scl_prefix}rubygem(fog) => 1.31.0
-BuildRequires: %{?scl_prefix}rubygem(net-ssh) => 2.9.2
-BuildRequires: %{?scl_prefix}rubygem(net-ssh) < 2.10
+Requires: %{?scl_prefix}ruby
+Requires: %{?scl_prefix}rubygem(fog) => 1.31.0
+Requires: %{?scl_prefix}rubygem(net-ssh) => 2.9.2
+Requires: %{?scl_prefix}rubygem(net-ssh) < 2.10
 BuildArch: noarch
 
 %description
