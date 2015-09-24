@@ -13,11 +13,9 @@ module Overcloud
       service('Baremetal').nodes.find_by_uuid(node_id)
     end
     
-    def create_node(node_parameters, create_flavor = false)
+    def create_node(node_parameters)
       node = service('Baremetal').nodes.create(node_parameters)
       create_port({:node_uuid => node.uuid, :address => node_parameters[:address]})
-
-      create_flavor_from_node(node) if create_flavor
 
       node.set_provision_state('manage')
       introspect_node(node.uuid)
@@ -28,7 +26,7 @@ module Overcloud
       service('Baremetal').ports.create(port_parameters)
     end
 
-    def create_nodes_from_csv(csv_file, create_flavor = false)
+    def create_nodes_from_csv(csv_file)
       CSV.foreach(csv_file) do |node_data|
         memory_mb = node_data[0]
         local_gb = node_data[1]
@@ -69,7 +67,7 @@ module Overcloud
           },
           :address => mac_address
         }
-        node = create_node(node_parameters, create_flavor)
+        node = create_node(node_parameters)
       end
     end
 
@@ -98,7 +96,11 @@ module Overcloud
                          'X-Auth-Token' => auth_token},
             :method  => 'GET'
           })
-      Fog::JSON.decode(response.body)['finished']
+      finished = Fog::JSON.decode(response.body)['finished']
+      if finished
+        create_flavor_from_node(get_node(node_uuid))
+      end
+      finished
     end
 
   end
