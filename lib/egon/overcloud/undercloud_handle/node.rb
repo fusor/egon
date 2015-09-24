@@ -17,8 +17,6 @@ module Overcloud
       node = service('Baremetal').nodes.create(node_parameters)
       create_port({:node_uuid => node.uuid, :address => node_parameters[:address]})
 
-      create_flavor_from_node(node) if create_flavor
-
       node.set_provision_state('manage')
       introspect_node(node.uuid)
       node
