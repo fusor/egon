@@ -18,7 +18,6 @@ module Overcloud
       create_port({:node_uuid => node.uuid, :address => node_parameters[:address]})
 
       node.set_provision_state('manage')
-      introspect_node(node.uuid)
       node
     end
 
@@ -68,6 +67,7 @@ module Overcloud
           :address => mac_address
         }
         node = create_node(node_parameters)
+        introspect_node(node.uuid)
       end
     end
 
