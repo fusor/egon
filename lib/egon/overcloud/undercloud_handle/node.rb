@@ -71,6 +71,10 @@ module Overcloud
       end
     end
 
+    def delete_node(node_id)
+      service('Baremetal').nodes.destroy(node_id)
+    end
+
     ## THESE METHODS ARE TEMPORARY UNTIL IRONIC-DISCOVERD IS ADDED TO
     ## OPENSTACK AND KEYSTONE
 
