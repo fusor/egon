@@ -14,11 +14,16 @@ module Overcloud
     end
     
     def create_node(node_parameters)
+      node = create_node_only(node_parameters)
+      introspect_node(node.uuid)
+      node
+    end
+
+    def create_node_only(node_parameters)
       node = service('Baremetal').nodes.create(node_parameters)
       create_port({:node_uuid => node.uuid, :address => node_parameters[:address]})
 
       node.set_provision_state('manage')
-      introspect_node(node.uuid)
       node
     end
 
