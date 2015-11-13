@@ -105,8 +105,12 @@ module Overcloud
                          'X-Auth-Token' => auth_token},
             :method  => 'GET'
           })
-      finished = Fog::JSON.decode(response.body)['finished']
+      body = Fog::JSON.decode(response.body)
+      finished = body['finished']
       if finished
+        if body['error']
+          raise body['error']
+        end
         create_flavor_from_node(get_node(node_uuid))
       end
       finished
