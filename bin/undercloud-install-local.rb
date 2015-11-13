@@ -1,3 +1,4 @@
+#! /usr/bin/ruby
 require 'egon/undercloud/commands'
 require 'egon/undercloud/installer'
 
