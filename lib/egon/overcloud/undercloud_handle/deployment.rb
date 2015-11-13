@@ -47,7 +47,7 @@ module Overcloud
       for role in list_deployment_roles
         flavor_parameter_name = role.name + "-1::Flavor"
         flavor_parameter_value = get_plan_parameter_value(plan_name, flavor_parameter_name)
-        if flavor_parameter_value.to_s == ''
+        if flavor_parameter_value.to_s == 'baremetal'
           edit_plan_deployment_role_count(plan_name, role.name, 0)
           edit_plan_deployment_role_flavor(plan_name, role.name, default_flavor.name)
         end
