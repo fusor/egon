@@ -13,7 +13,7 @@ URL: https://github.com/fusor/egon
 Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
 BuildRequires: %{?scl_prefix}rubygems-devel
 Requires: %{?scl_prefix}ruby
-Requires: %{?scl_prefix}rubygem(fog) => 1.31.0
+Requires: %{?scl_prefix}rubygem(fog) => 1.36.0
 Requires: %{?scl_prefix}rubygem(net-ssh) => 2.9.2
 Requires: %{?scl_prefix}rubygem(net-ssh) < 2.10
 BuildArch: noarch
@@ -93,6 +93,9 @@ popd
 %{gem_instdir}/test
 
 %changelog
+* Thu Oct 29 2015 Jason Rist <jrist@redhat.com> 0.4.8
+- bump fog requirement to 1.36.0 to fix uuid bug (jrist@redhat.com)
+
 * Thu Sep 10 2015 Jason Montleon <jmontleo@redhat.com> 0.4.2-7
 - gempsec and rpm spec cleanup (jmontleo@redhat.com)
 
