@@ -3,8 +3,6 @@ require 'fog/openstack/models/baremetal/nodes'
 require 'fog/openstack/models/compute/flavors'
 require 'fog/openstack/models/image_v1/image'
 require 'fog/openstack/models/orchestration/stacks'
-require 'fog/openstack/models/planning/plans'
-require 'fog/openstack/models/planning/role'
 require './lib/egon/overcloud/undercloud_handle'
 
 describe "overcloud installation mocked" do
@@ -71,34 +69,14 @@ describe "overcloud installation mocked" do
       allow(compute_service).to receive(:flavors).and_return(flavors)
       allow(@undercloud_handle).to receive(:service).with('Compute').and_return(compute_service)
 
-      # setup for mock planning service
-      planning_service = Fog::Openstack::Planning::Mock.new(options)
-      plans = Fog::Openstack::Planning::Plans.new
-      overcloud_plan = Fog::Openstack::Planning::Plan.new({
-        :uuid => '1',
-        :name => 'overcloud'
-      })
-      compute_role = Fog::Openstack::Planning::Role.new({
-        :uuid => '1',
-        :name => 'Compute'
-      })
-      controller_role = Fog::Openstack::Planning::Role.new({
-        :uuid => '1',
-        :name => 'Controller'
-      })
-      allow(planning_service).to receive(:roles).and_return([compute_role, controller_role])
-      allow(planning_service).to receive(:plans).and_return(plans)
-      allow(plans).to receive(:find_by_name).and_return(overcloud_plan)
-      allow(@undercloud_handle).to receive(:service).with('Planning').and_return(planning_service)
-
       # setup for mock orchestration service
       orchestration_service = Fog::Orchestration::OpenStack::Mock.new(options)
       stacks = Fog::Orchestration::OpenStack::Stacks.new
       overcloud_stack = Fog::Orchestration::OpenStack::Stack.new({
         'id' => '1',
-        'name' => 'overcloud',
+        'stack_name' => 'overcloud',
       })
-      allow(stacks).to receive(:get).and_return(overcloud_stack)
+      allow(stacks).to receive(:all).and_return([overcloud_stack])
       allow(orchestration_service).to receive(:stacks).and_return(stacks)
       allow(@undercloud_handle).to receive(:service).with('Orchestration').and_return(orchestration_service)
     end
@@ -164,16 +142,8 @@ describe "overcloud installation mocked" do
       expect(@undercloud_handle.list_nodes.length).to eq 2
     end
 
-    it "should be able to list_deployment_roles" do
-      expect(@undercloud_handle.list_deployment_roles.length).to eq 2
-    end
-
-    it "should be able to get_plan" do
-      expect(@undercloud_handle.get_plan('overcloud').uuid).to eq '1'
-    end
-
     it "should be able to get_stack" do
-      expect(@undercloud_handle.get_stack('overcloud').id).to eq '1'
+      expect(@undercloud_handle.get_stack_by_name('overcloud').id).to eq '1'
     end
   end
 end
