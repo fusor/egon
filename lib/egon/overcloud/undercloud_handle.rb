@@ -1,6 +1,5 @@
 require 'fog'
 require_relative 'undercloud_handle/deployment'
-require_relative 'undercloud_handle/deployment_role'
 require_relative 'undercloud_handle/flavor'
 require_relative 'undercloud_handle/image'
 require_relative 'undercloud_handle/node'
@@ -9,7 +8,6 @@ module Overcloud
   class UndercloudHandle
 
     include Overcloud::Deployment
-    include Overcloud::DeploymentRole
     include Overcloud::Flavor
     include Overcloud::Image
     include Overcloud::Node
@@ -37,6 +35,10 @@ module Overcloud
       end
       return Fog.const_get(service_name).new(fog_parameters)
     end
-  
+
+    def auth_token
+      service('Baremetal').instance_variable_get(:@auth_token)
+    end
+
   end
 end

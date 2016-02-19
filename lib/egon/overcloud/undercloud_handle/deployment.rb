@@ -1,37 +1,32 @@
 module Overcloud
   module Deployment
+
+    # BASE PLAN ACTIONS
+
+    def list_plans
+      uri = "#{base_tripleo_api_url}/plans"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'GET'
+          })
+      body = Fog::JSON.decode(response.body)
+      body['plans']
+    end
  
     def get_plan(plan_name)
-      service('Planning').plans.find_by_name(plan_name)
-    end
-
-    def get_plan_parameter_value(plan_name, parameter_name)
-      params = get_plan(plan_name).parameters
-      param = params.find{|param| param["name"] == parameter_name }
-      if param
-        param["value"]
-      else
-        nil
-      end
-    end
-
-    def edit_plan_parameters(plan_name, parameters)
-      get_plan(plan_name).patch(:parameters => parameters)
-    end
-
-    def edit_plan_deployment_role_count(plan_name, role_name, count)
-      parameter = {"name" => role_name + "-1::count", "value" => count.to_s}
-      edit_plan_parameters(plan_name, [parameter])
-    end
-
-    def edit_plan_deployment_role_image(plan_name, role_name, image_uuid)
-      parameter = {"name" => role_name + "-1::Image", "value" => image_uuid}
-      edit_plan_parameters([parameter])
-    end
-
-    def edit_plan_deployment_role_flavor(plan_name, role_name, flavor_name)
-      parameter = {"name" => role_name + "-1::Flavor", "value" => flavor_name}
-      edit_plan_parameters(plan_name, [parameter])
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'GET'
+          })
+      body = Fog::JSON.decode(response.body)
+      body['plan']
     end
 
     def deploy_plan(plan_name)
@@ -53,28 +48,123 @@ module Overcloud
         end
       end
 
-      # temporary workaround for https://bugzilla.redhat.com/show_bug.cgi?id=1212740
-      templates = Hash[plan.provider_resource_templates]
-      templates.keys.each do |template_path|
-        if template_path.index('puppet/') == 0
-          new_template_path = template_path.sub('puppet/','')
-          templates[new_template_path] = templates[template_path]
-        end
-      end
-      templates["hieradata/RedHat.yaml"] = templates["puppet/hieradata/RedHat.yaml"]
-      templates["yum_update.sh"] = templates["extraconfig/tasks/yum_update.sh"]
-
-      stack_parameters = {
-        :stack_name => plan.name,
-        :template => plan.master_template,
-        :environment => plan.environment,
-        :files => templates,
-        :password => @password,
-        :timeout_mins => 60,
-        :disable_rollback => true
-      }
-      service('Orchestration').stacks.new.save(stack_parameters)
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}/deploy"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'PUT'
+          })
     end
+
+    ## PLAN PARAMETER METHODS
+
+    def get_plan_parameters(plan_name)
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}/parameters"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'GET'
+          })
+      body = Fog::JSON.decode(response.body)
+      body['parameters']['Parameters']
+    end
+
+    def get_plan_parameter_value(plan_name, parameter_name)
+      parameters = get_plan_parameters(plan_name)
+      if parameters.key?(parameter_name)
+        parameters[parameter_name]["Default"]
+      else
+        nil
+      end
+    end
+
+    def edit_plan_parameters(plan_name, parameters)
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}/parameters"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'PATCH',
+            :body => Fog::JSON.encode(parameters),
+          })
+    end
+
+    def edit_plan_deployment_role_count(plan_name, role_name, count)
+      parameters = { role_name + "Count" => count.to_s}
+      edit_plan_parameters(plan_name, parameters)
+    end
+
+    def edit_plan_deployment_role_image(plan_name, role_name, image_name)
+      parameters = { role_name.downcase + "Image" => image_name}
+      edit_plan_parameters(plan_name, parameters)
+    end
+
+    def edit_plan_deployment_role_flavor(plan_name, role_name, flavor_name)
+      parameter = {"name" => role_name + "-1::Flavor", "value" => flavor_name}
+      edit_plan_parameters(plan_name, [parameter])
+    end
+
+    ## PLAN ENVIRONMENT ACTIONS
+
+    def get_plan_environments(plan_name)
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}/environments"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'GET'
+          })
+      body = Fog::JSON.decode(response.body)
+      body['environments']
+    end
+
+    def edit_plan_environments(plan_name, environments)
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}/environments"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'PATCH',
+            :body => Fog::JSON.encode(environments),
+          })
+    end
+
+    ## MISCELLANEOUS PLAN ACTIONS
+
+    def get_plan_deployment_roles(plan_name)
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}/roles"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'GET'
+          })
+      body = Fog::JSON.decode(response.body)
+      body['roles']
+    end
+
+    def get_plan_resource_types(plan_name)
+      uri = "#{base_tripleo_api_url}/plans/#{plan_name}/resource_types"
+      response = Fog::Core::Connection.new(uri, false).request({
+            :expects => 200,
+            :headers => {'Content-Type' => 'application/json',
+                         'Accept' => 'application/json',
+                         'X-Auth-Token' => auth_token},
+            :method  => 'GET'
+          })
+      body = Fog::JSON.decode(response.body)
+      body['resource_types']
+    end
+
+    ## HEAT ACTIONS
 
     def list_stacks
       service('Orchestration').stacks.all
@@ -83,6 +173,12 @@ module Overcloud
     def get_stack_by_name(stack_name)
       list_stacks.find{|s| s.stack_name == stack_name}
     end
-  
+
+    private
+    
+    def base_tripleo_api_url
+      return "http://#{@auth_url}:8585/v1"
+    end
+
   end
 end
