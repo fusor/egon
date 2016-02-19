@@ -1,7 +1,7 @@
 require 'fog'
 require 'fog/openstack/models/baremetal/nodes'
 require 'fog/openstack/models/compute/flavors'
-require 'fog/openstack/models/image/image'
+require 'fog/openstack/models/image_v1/image'
 require 'fog/openstack/models/orchestration/stacks'
 require 'fog/openstack/models/planning/plans'
 require 'fog/openstack/models/planning/role'
@@ -18,12 +18,12 @@ describe "overcloud installation mocked" do
       @undercloud_handle = Overcloud::UndercloudHandle.new(options[:openstack_username], 'xxxxxxx', options[:openstack_auth_url])
 
       # setup for mock image service
-      image_service = Fog::Image::OpenStack::Mock.new(options)
-      bm_deploy_kernel_image = Fog::Image::OpenStack::Image.new({
+      image_service = Fog::Image::OpenStack::V1::Mock.new(options)
+      bm_deploy_kernel_image = Fog::Image::OpenStack::V1::Image.new({
         :id => '1',
         :name => 'bm-deploy-kernel'
       })
-      bm_deploy_ramdisk_image = Fog::Image::OpenStack::Image.new({
+      bm_deploy_ramdisk_image = Fog::Image::OpenStack::V1::Image.new({
         :id => '2',
         :name => 'bm-deploy-ramdisk'
       })
