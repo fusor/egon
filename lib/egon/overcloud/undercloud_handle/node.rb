@@ -9,6 +9,14 @@ module Overcloud
       service('Baremetal').nodes.details
     end
 
+    def list_ports
+      service('Baremetal').ports.all
+    end
+
+    def list_ports_detailed
+      service('Baremetal').ports.details
+    end
+
     def get_node(node_id)
       service('Baremetal').nodes.find_by_uuid(node_id)
     end
