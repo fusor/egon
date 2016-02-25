@@ -52,7 +52,7 @@ module Egon
         end
       end
 
-      def check_ports(stringio=nil)
+      def check_ports(stringio=nil, ip='192.0.2.1')
         # closed ports 5385, 36357
         ports = [8774, 9292, 8777, 9696, 8004, 5000, 8585, 15672]
         ports.each do |p|
@@ -63,7 +63,7 @@ module Egon
             end
           else
             # local check
-            set_failure(true) unless !port_open?("192.0.2.1", p, stringio)
+            set_failure(true) unless !port_open?(ip, p, stringio)
           end
         end
       end
