@@ -85,7 +85,22 @@ module Overcloud
     end
 
     def delete_node(node_id)
-      service('Baremetal').nodes.destroy(node_id)
+      begin
+        node = get_node(node_id)
+        if node.power_state != 'power off' && node.provision_state != 'active'
+          node.set_power_state('power off')
+          retries = 15
+          while retries > 0 && node.power_state != 'power off' do
+            sleep(2)
+            retries -= 1
+          end
+        end
+        service('Baremetal').nodes.destroy(node_id)
+      rescue Fog::Compute::OpenStack::NotFound => e
+        "Node Not Found"
+      rescue Excon::Errors::Conflict, Excon::Errors::BadRequest => e
+        JSON.parse(JSON.parse(e.response.body)["error_message"])["faultstring"].split("\n").first
+      end
     end
 
     ## THESE METHODS ARE TEMPORARY UNTIL IRONIC-DISCOVERD IS ADDED TO
