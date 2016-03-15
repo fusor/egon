@@ -54,6 +54,9 @@ module Egon
 
       def check_ports(stringio=nil)
         # closed ports 5385, 36357
+        address = File.foreach('/home/stack/undercloud.conf')
+                      .grep(/^local_ip/).first
+                      .match(/(?:[0-9]{1,3}\.){3}[0-9]{1,3}/).to_s
         ports = [8774, 9292, 8777, 9696, 8004, 5000, 8585, 15672]
         ports.each do |p|
           if !@connection.nil?
@@ -63,7 +66,7 @@ module Egon
             end
           else
             # local check
-            set_failure(true) unless !port_open?("192.0.2.1", p, stringio)
+            set_failure(true) unless !port_open?(address, p, stringio)
           end
         end
       end
