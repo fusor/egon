@@ -87,7 +87,7 @@ module Overcloud
     def delete_node(node_id)
       begin
         node = get_node(node_id)
-        if node.power_state != 'power off' && node.provision_state != 'active'
+        if node.power_state == 'power on' && node.provision_state != 'active'
           node.set_power_state('power off')
           retries = 15
           while retries > 0 && node.power_state != 'power off' do
