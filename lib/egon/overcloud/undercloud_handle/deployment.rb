@@ -128,8 +128,10 @@ module Overcloud
     ## MISCELLANEOUS PLAN ACTIONS
 
     def get_plan_deployment_roles(plan_name)
+      # temporarily hard-coded until API adds role function
       return ['Controller', 'Compute', 'BlockStorage', 'ObjectStorage',
               'CephStorage']
+
       #uri = "#{base_tripleo_api_url}/plans/#{plan_name}/roles"
       #response = Fog::Core::Connection.new(uri, false).request({
       #      :expects => 200,
