@@ -3,12 +3,14 @@ module Egon
   module Undercloud
     class Commands
 
+      ## OSP7
+
       def self.OSP7_satellite(satellite_url, org, activation_key)
         return "
         curl -k -O #{satellite_url}/pub/katello-ca-consumer-latest.noarch.rpm
         sudo yum install -y katello-ca-consumer-latest.noarch.rpm
         sudo subscription-manager register --org=\"#{org}\" --activationkey=\"#{activation_key}\"
-        #{self.OSP7_COMMON_no_registration}"
+        #{self.OSP7_no_registration}"
       end
     
       def self.OSP7_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)
@@ -34,7 +36,7 @@ module Egon
         return OSP7_COMMON
       end
 
-      POST_INSTALL = "
+      POST_INSTALL_7 = "
       source ~/stackrc
       source ~/tripleo-undercloud-passwords
 
@@ -235,7 +237,111 @@ module Egon
       sudo chown $USER: ~/tripleo-undercloud-passwords
       sudo cp /root/stackrc ~
       sudo chown $USER: ~/stackrc
-      #{POST_INSTALL}"
+      #{POST_INSTALL_7}"
+
+      ## OSP8
+
+      def self.OSP8_satellite(satellite_url, org, activation_key)
+        return "
+        curl -k -O #{satellite_url}/pub/katello-ca-consumer-latest.noarch.rpm
+        sudo yum install -y katello-ca-consumer-latest.noarch.rpm
+        sudo subscription-manager register --org=\"#{org}\" --activationkey=\"#{activation_key}\"
+        #{self.OSP8_no_registration}"
+      end
+    
+      def self.OSP8_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)
+        return "
+        sudo subscription-manager register --force --username=\"#{rhsm_user}\" --password=\"#{rhsm_password}\"
+        sudo subscription-manager attach --pool=\"#{rhsm_pool_id}\"
+        sudo subscription-manager repos --enable=rhel-7-server-rpms \
+         --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-extras-rpms \
+         --enable=rhel-7-server-openstack-6.0-rpms
+        #{self.OSP8_no_registration}"
+      end
+    
+      def self.OSP8_no_registration
+        return "
+        sudo yum install -y python-rdomanager-oscplugin
+        if [ ! -f ~/undercloud.conf ]; then
+          cp -f /usr/share/instack-undercloud/undercloud.conf.sample ~/undercloud.conf;
+          sed -i -- 's/#store_events = false/store_events = true/g' ~/undercloud.conf
+        fi
+        #{self.OSP8_no_registration_no_packages}"
+      end
+
+      def self.OSP8_no_registration_no_packages
+        return OSP8_COMMON
+      end
+
+      POST_INSTALL_8 = "
+      sudo setenforce permissive
+      source ~/stackrc
+
+      sudo yum install -y rhosp-director-images
+      cd /usr/share/rhosp-director-images
+      sudo tar xf ironic-python-agent.tar
+      sudo tar xf overcloud-full.tar
+      openstack overcloud image upload
+      cd ~
+
+      SUBNET_ID=$(neutron subnet-show ''  | awk '$2==\"id\" {print $4}')
+      neutron subnet-update $SUBNET_ID --dns-nameserver 192.168.122.1
+
+      OS_AUTH_URL_ESC=$(sed 's/\\\//\\\\\\//g' <<<\"$OS_AUTH_URL\")
+      sudo yum install -y openstack-tripleo-api
+      sudo sed -i -- \"s/#auth_strategy = keystone/auth_strategy = noauth/g\" /etc/tripleo/tripleo.conf
+      sudo sed -i -- \"s/#password = <None>/password = $OS_PASSWORD/g\" /etc/tripleo/tripleo.conf
+      sudo sed -i -- \"s/#auth_url = http:\\/\\/localhost:35357\\/v2.0/auth_url = $OS_AUTH_URL_ESC/g\" /etc/tripleo/tripleo.conf
+      sudo sed -i -- \"s/#identity_uri = <None>/identity_uri = $OS_AUTH_URL_ESC/g\" /etc/tripleo/tripleo.conf
+      sudo sed -i -- \"s/#admin_user = <None>/admin_user = admin/g\" /etc/tripleo/tripleo.conf
+      sudo sed -i -- \"s/#admin_password = <None>/admin_password = $OS_PASSWORD/g\" /etc/tripleo/tripleo.conf
+      sudo service openstack-tripleo-api restart
+
+      sudo sed -i -- \"s/max_json_body_size = 1048576/max_json_body_size = 2000000/g\" /etc/heat/heat.conf
+      sudo service openstack-heat-api restart
+      sudo service openstack-heat-api-cfn restart
+      sudo service openstack-heat-engine restart
+
+      if ! [ $(swift list | grep overcloud) ]; then
+
+        cp -r /usr/share/openstack-tripleo-heat-templates .
+        cp /usr/share/tripleo-api/templates/capabilities-map.yaml openstack-tripleo-heat-templates/.
+
+        echo '  BlockStorageImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  CephStorageImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  SwiftStorageImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  controllerImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  NovaImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  OvercloudBlockStorageFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  OvercloudControlFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  OvercloudComputeFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  OvercloudSwiftStorageFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  CinderPassword: Ma3kfBHqB8FDb2hgJa3sPUAzh' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  GlancePassword: EBNnAsWxuzAHfqG8trjjMDsCu' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  SwiftPassword: KfqyTxGtQ9y7P6yCK2m7n2xMz' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  NeutronMetadataProxySharedSecret: A2kEkckqfAzxcdVEJtnWj4hGP' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  HeatPassword: BEhHu9UhKd4ZnQwmtCUFsZrh4' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  HeatStackDomainAdminPassword: fpRbkRneNJVutk4QqK8xYR3Qm' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  AdminPassword: MjFshnTPgMMExCRDuRcH2XhMQ' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  NeutronPassword: 9n3AfD2b9zfBrmmBHwHyc7TgV' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  AdminToken: CuVyGZqfwZdbTwUaX9euaPGaA' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  SwiftHashSuffix: JN273288Xt3JTBqnE8RBsrYze' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  CeilometerMeteringSecret: Hvkf9Rzz6tHF6UVsErPjCE3uM' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  SnmpdReadonlyUserPassword: password' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  CeilometerPassword: 2zgV6yAE2d3JTskTnBUsvzDf4' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  NovaPassword: QCn7EHTkMMrJHH7Upp6txzUYX' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  RedisPassword: Rhq8Fd7eEIoPP821Ui' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  HAProxyStatsPassword: veLYjyhxgs7GtQuKXF' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+
+        sudo tripleo-plan-create --config-file /etc/tripleo/tripleo.conf
+      fi
+      "
+
+      OSP8_COMMON = "
+      sudo sed -i '$ a\net.ipv4.ip_forward = 1' /etc/sysctl.conf
+      sudo sysctl -p /etc/sysctl.conf
+      openstack undercloud install
+      #{POST_INSTALL_8}"
 
     end
   end  
