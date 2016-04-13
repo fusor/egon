@@ -312,10 +312,6 @@ module Egon
         echo '  SwiftStorageImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  controllerImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  NovaImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  OvercloudBlockStorageFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  OvercloudControlFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  OvercloudComputeFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  OvercloudSwiftStorageFlavor: baremetal' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  CinderPassword: Ma3kfBHqB8FDb2hgJa3sPUAzh' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  GlancePassword: EBNnAsWxuzAHfqG8trjjMDsCu' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  SwiftPassword: KfqyTxGtQ9y7P6yCK2m7n2xMz' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
