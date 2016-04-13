@@ -15,7 +15,7 @@ SATELLITE_ACTIVATION_KEY = ARGV[5]
 
 connection = Egon::Undercloud::SSHConnection.new(SSH_HOST, SSH_USER, SSH_PASSWORD)
 installer = Egon::Undercloud::Installer.new(connection)
-installer.install(Egon::Undercloud::Commands.OSP7_satellite(SATELLITE_URL, SATELLITE_ORG, SATELLITE_ACTIVATION_KEY))
+installer.install(Egon::Undercloud::Commands.OSP8_satellite(SATELLITE_URL, SATELLITE_ORG, SATELLITE_ACTIVATION_KEY))
 while !installer.completed?
   sleep 1
 end  

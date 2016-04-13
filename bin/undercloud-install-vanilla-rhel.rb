@@ -13,7 +13,7 @@ RHSM_POOL_ID = ARGV[5]
 
 connection = Egon::Undercloud::SSHConnection.new(SSH_HOST, SSH_USER, SSH_PASSWORD)
 installer = Egon::Undercloud::Installer.new(connection)
-installer.install(Egon::Undercloud::Commands.OSP7_vanilla_rhel(RHSM_USER, RHSM_PASSWORD, RHSM_POOL_ID))
+installer.install(Egon::Undercloud::Commands.OSP8_vanilla_rhel(RHSM_USER, RHSM_PASSWORD, RHSM_POOL_ID))
 while !installer.completed?
   sleep 1
 end  
