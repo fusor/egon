@@ -56,7 +56,8 @@ module Overcloud
             :headers => {'Content-Type' => 'application/json',
                          'Accept' => 'application/json',
                          'X-Auth-Token' => auth_token},
-            :method  => 'GET'
+            :method  => 'GET',
+            :read_timeout => 360,
           })
       body = Fog::JSON.decode(response.body)
       body['parameters']['Parameters']
@@ -80,6 +81,8 @@ module Overcloud
                          'X-Auth-Token' => auth_token},
             :method  => 'PATCH',
             :body => Fog::JSON.encode(parameters),
+            :read_timeout => 360,
+            :write_timeout => 360,
           })
     end
 
@@ -107,7 +110,8 @@ module Overcloud
             :headers => {'Content-Type' => 'application/json',
                          'Accept' => 'application/json',
                          'X-Auth-Token' => auth_token},
-            :method  => 'GET'
+            :method  => 'GET',
+            :read_timeout => 360,
           })
       body = Fog::JSON.decode(response.body)
       body['environments']
@@ -122,6 +126,8 @@ module Overcloud
                          'X-Auth-Token' => auth_token},
             :method  => 'PATCH',
             :body => Fog::JSON.encode(environments),
+            :read_timeout => 360,
+            :write_timeout => 360,
           })
     end
 
