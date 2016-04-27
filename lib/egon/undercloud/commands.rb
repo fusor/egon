@@ -318,7 +318,6 @@ module Egon
         echo '  NeutronMetadataProxySharedSecret: A2kEkckqfAzxcdVEJtnWj4hGP' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  HeatPassword: BEhHu9UhKd4ZnQwmtCUFsZrh4' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  HeatStackDomainAdminPassword: fpRbkRneNJVutk4QqK8xYR3Qm' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  AdminPassword: MjFshnTPgMMExCRDuRcH2XhMQ' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  NeutronPassword: 9n3AfD2b9zfBrmmBHwHyc7TgV' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  AdminToken: CuVyGZqfwZdbTwUaX9euaPGaA' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  SwiftHashSuffix: JN273288Xt3JTBqnE8RBsrYze' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
@@ -328,6 +327,9 @@ module Egon
         echo '  NovaPassword: QCn7EHTkMMrJHH7Upp6txzUYX' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  RedisPassword: Rhq8Fd7eEIoPP821Ui' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  HAProxyStatsPassword: veLYjyhxgs7GtQuKXF' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+
+        echo 'parameter_defaults:' >> openstack-tripleo-heat-templates/environments/deployment_parameters.yaml
+        echo '  AdminPassword: changeme' >> openstack-tripleo-heat-templates/environments/deployment_parameters.yaml
 
         sudo tripleo-plan-create --config-file /etc/tripleo/tripleo.conf
       fi
