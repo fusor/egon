@@ -296,7 +296,7 @@ module Egon
       sudo sed -i -- \"s/#admin_user = <None>/admin_user = admin/g\" /etc/tripleo/tripleo.conf
       sudo sed -i -- \"s/#admin_password = <None>/admin_password = $OS_PASSWORD/g\" /etc/tripleo/tripleo.conf
       sudo service openstack-tripleo-api restart
-
+      sudo systemctl enable openstack-tripleo-api
       sudo sed -i -- \"s/max_json_body_size = 1048576/max_json_body_size = 2000000/g\" /etc/heat/heat.conf
       sudo service openstack-heat-api restart
       sudo service openstack-heat-api-cfn restart
