@@ -160,6 +160,10 @@ module Overcloud
       list_stacks.find{|s| s.stack_name == stack_name}
     end
 
+    def delete_stack(overcloud)
+      service('Orchestration').delete_stack(overcloud)
+    end
+
     private
     
     def base_tripleo_api_url
