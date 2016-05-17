@@ -4,8 +4,8 @@
 %global gem_name egon
 
 Name: %{?scl_prefix}rubygem-%{gem_name}
-Version: 0.4.2
-Release: 7%{?dist}
+Version: 1.0.0
+Release: 0%{?dist}
 Summary: A library on top of Fog that encapsulates TripleO deployment operations
 Group: Development/Languages
 License: GPL-3.0+
