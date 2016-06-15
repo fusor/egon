@@ -1,3 +1,4 @@
+require 'securerandom'
 
 module Egon
   module Undercloud
@@ -312,21 +313,21 @@ module Egon
         echo '  SwiftStorageImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  controllerImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  NovaImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  CinderPassword: Ma3kfBHqB8FDb2hgJa3sPUAzh' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  GlancePassword: EBNnAsWxuzAHfqG8trjjMDsCu' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  SwiftPassword: KfqyTxGtQ9y7P6yCK2m7n2xMz' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  NeutronMetadataProxySharedSecret: A2kEkckqfAzxcdVEJtnWj4hGP' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  HeatPassword: BEhHu9UhKd4ZnQwmtCUFsZrh4' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  HeatStackDomainAdminPassword: fpRbkRneNJVutk4QqK8xYR3Qm' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  NeutronPassword: 9n3AfD2b9zfBrmmBHwHyc7TgV' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  AdminToken: CuVyGZqfwZdbTwUaX9euaPGaA' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  SwiftHashSuffix: JN273288Xt3JTBqnE8RBsrYze' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  CeilometerMeteringSecret: Hvkf9Rzz6tHF6UVsErPjCE3uM' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  SnmpdReadonlyUserPassword: password' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  CeilometerPassword: 2zgV6yAE2d3JTskTnBUsvzDf4' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  NovaPassword: QCn7EHTkMMrJHH7Upp6txzUYX' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  RedisPassword: Rhq8Fd7eEIoPP821Ui' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
-        echo '  HAProxyStatsPassword: veLYjyhxgs7GtQuKXF' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  CinderPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  GlancePassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  SwiftPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  NeutronMetadataProxySharedSecret: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  HeatPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  HeatStackDomainAdminPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  NeutronPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  AdminToken: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  SwiftHashSuffix: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  CeilometerMeteringSecret: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  SnmpdReadonlyUserPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  CeilometerPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  NovaPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  RedisPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
+        echo '  HAProxyStatsPassword: #{SecureRandom.hex}' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
 
         echo 'parameter_defaults:' >> openstack-tripleo-heat-templates/environments/deployment_parameters.yaml
         echo '  AdminPassword: changeme' >> openstack-tripleo-heat-templates/environments/deployment_parameters.yaml
