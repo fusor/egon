@@ -60,7 +60,7 @@ module Overcloud
             :read_timeout => 360,
           })
       body = Fog::JSON.decode(response.body)
-      body['parameters']['Parameters']
+      flatten_parameters(body['parameters'])
     end
 
     def get_plan_parameter_value(plan_name, parameter_name)
@@ -168,6 +168,19 @@ module Overcloud
     
     def base_tripleo_api_url
       return "http://#{@auth_url}:8585/v1"
+    end
+
+    def flatten_parameters(base_parameters)
+      flat_parameters = {}
+      if base_parameters.key?('Parameters')
+        flat_parameters.merge!base_parameters['Parameters']
+      end
+      if base_parameters.key?('NestedParameters')
+        for nested_parameters in base_parameters['NestedParameters']
+          flat_parameters.merge!(flatten_parameters(nested_parameters[1]))
+        end
+      end
+      flat_parameters
     end
 
   end
