@@ -298,10 +298,15 @@ module Egon
       sudo sed -i -- \"s/#admin_password = <None>/admin_password = $OS_PASSWORD/g\" /etc/tripleo/tripleo.conf
       sudo service openstack-tripleo-api restart
       sudo systemctl enable openstack-tripleo-api
+
       sudo sed -i -- \"s/max_json_body_size = 1048576/max_json_body_size = 2000000/g\" /etc/heat/heat.conf
       sudo service openstack-heat-api restart
       sudo service openstack-heat-api-cfn restart
       sudo service openstack-heat-engine restart
+
+      sudo sed -i -- \"s/scheduler_use_baremetal_filters=False/scheduler_use_baremetal_filters=True/g\" /etc/nova/nova.conf
+      sudo sed -i -- \"s/#baremetal_scheduler_default_filters/baremetal_scheduler_default_filters/g\" /etc/nova/nova.conf
+      sudo service openstack-nova-scheduler restart
 
       if ! [ $(swift list | grep overcloud) ]; then
 
