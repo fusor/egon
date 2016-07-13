@@ -308,6 +308,8 @@ module Egon
       sudo sed -i -- \"s/#baremetal_scheduler_default_filters/baremetal_scheduler_default_filters/g\" /etc/nova/nova.conf
       sudo service openstack-nova-scheduler restart
 
+      while ! swift stat; do echo "Swift is not ready. Sleeping for 30 seconds."; sleep 30; done
+
       if ! [ $(swift list | grep overcloud) ]; then
 
         cp -r /usr/share/openstack-tripleo-heat-templates .
