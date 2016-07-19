@@ -363,7 +363,7 @@ module Egon
       "
 
       OSP8_COMMON = "
-      sudo sed -i '$ a\net.ipv4.ip_forward = 1' /etc/sysctl.conf
+      sudo sed -i '/^net.ipv4.ip_forward =/{h;s/=.*/= 1/};${x;/^$/{s//net.ipv4.ip_forward = 1/;H};x}' /etc/sysctl.conf
       sudo sysctl -p /etc/sysctl.conf
       openstack undercloud install
       #{POST_INSTALL_8}"
