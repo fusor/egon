@@ -308,7 +308,26 @@ module Egon
       sudo sed -i -- \"s/#baremetal_scheduler_default_filters/baremetal_scheduler_default_filters/g\" /etc/nova/nova.conf
       sudo service openstack-nova-scheduler restart
 
-      while ! swift stat; do echo \"Swift is not ready. Sleeping for 30 seconds.\"; sleep 30; done
+      retries=5
+
+      # Temporarily deal with BZ#1319795
+      retry_count=0
+      while ! systemctl is-active openstack-swift-* >/dev/null && (( retry_count < retries )); do
+        echo \"Swift services not started, retrying.\"
+        let retry_count+=1; sudo openstack-service restart swift; sleep 60;
+      done
+
+      # Swift is not always immediately responsive
+      retry_count=0
+      while ! swift stat 2>/dev/null && (( $retry_count < $retries )); do
+        echo \"Swift is not ready. Sleeping for 30 seconds.\";
+        let retry_count+=1; sleep 30;
+      done
+
+      if ! swift stat 2>/dev/null; then
+        echo \"Swift did not start properly. Please fix the problem before trying again\"
+        exit 1
+      fi
 
       if ! [ $(swift list | grep overcloud) ]; then
 
