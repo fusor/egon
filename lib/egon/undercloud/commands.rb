@@ -262,7 +262,6 @@ module Egon
     
       def self.OSP8_no_registration
         return "
-        sudo yum install -y python-rdomanager-oscplugin
         if [ ! -f ~/undercloud.conf ]; then
           cp -f /usr/share/instack-undercloud/undercloud.conf.sample ~/undercloud.conf;
           sed -i -- 's/#store_events = false/store_events = true/g' ~/undercloud.conf
