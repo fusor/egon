@@ -332,6 +332,42 @@ module Egon
 
         cp -r /usr/share/openstack-tripleo-heat-templates .
         cp /usr/share/tripleo-api/templates/capabilities-map.yaml openstack-tripleo-heat-templates/.
+        cat << 'EOF' >> openstack-tripleo-heat-templates/capabilities-map.yaml
+  - title: TLS
+    description:
+    environment_groups:
+      - title: TLS
+        description: >
+          Enable TLS
+        environments:
+          - file: environments/enable-tls.yaml
+            title: Enable TLS
+            description:
+            requires:
+              - ../puppet/extraconfig/tls/tls-cert-inject.yaml
+          - file: environments/inject-trust-anchor.yaml
+            title: Inject CA
+            description:
+            requires:
+              - ../puppet/extraconfig/tls/tls-cert-inject.yaml
+
+  - title: Registration
+    description:
+    environment_groups:
+      - title: Registration
+        description: >
+          Register the Overcloud to CDN or Satellite
+        environments:
+          - file: environments/rhel-registration.yaml
+            title: RHEL Registration
+            description:
+            requires:
+              - extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml
+EOF
+
+        cat openstack-tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml > openstack-tripleo-heat-templates/environments/rhel-registration.yaml
+        cat openstack-tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/environment-rhel-registration.yaml >> openstack-tripleo-heat-templates/environments/rhel-registration.yaml
+        sed -i 's,rhel-registration.yaml,../extraconfig/pre_deploy/rhel-registration/rhel-registration.yaml,g' openstack-tripleo-heat-templates/environments/rhel-registration.yaml
 
         echo '  BlockStorageImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
         echo '  CephStorageImage: overcloud-full' >> openstack-tripleo-heat-templates/overcloud-resource-registry-puppet.yaml
@@ -358,6 +394,10 @@ module Egon
         echo '  AdminPassword: changeme' >> openstack-tripleo-heat-templates/environments/deployment_parameters.yaml
 
         sudo tripleo-plan-create --config-file /etc/tripleo/tripleo.conf
+
+        pushd openstack-tripleo-heat-templates
+        swift upload overcloud extraconfig/pre_deploy/rhel-registration/scripts/rhel-registration extraconfig/pre_deploy/rhel-registration/scripts/rhel-unregistration
+        popd
       fi
       "
 
