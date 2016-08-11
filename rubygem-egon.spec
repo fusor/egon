@@ -80,7 +80,6 @@ popd
 %license %{gem_instdir}/LICENSE
 %{gem_instdir}/bin
 %{gem_libdir}
-%{gem_instdir}/rubygem-egon.spec
 %exclude %{gem_cache}
 %{gem_spec}
 
