@@ -3,3 +3,7 @@ builder = tito.builder.Builder
 tagger = tito.tagger.VersionTagger
 changelog_do_not_remove_cherrypick = 0
 changelog_format = %s (%ae)
+
+[version_template]
+template_file = ./version.rb.tmpl
+destination_file = ./lib/egon/version.rb
