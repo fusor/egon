@@ -85,13 +85,14 @@ popd
 
 %files doc
 %doc %{gem_docdir}
-%{gem_instdir}/Gemfile
 %doc %{gem_instdir}/README.md
 %{gem_instdir}/Rakefile
-%{gem_instdir}/egon.gemspec
 %{gem_instdir}/test
 
 %changelog
+* Thu Aug 01 2016 jesus m. rodriguez <jesusr@redhat.com>
+- remove unneeded files from the files section
+
 * Thu Oct 29 2015 Jason Rist <jrist@redhat.com> 0.4.8
 - bump fog requirement to 1.36.0 to fix uuid bug (jrist@redhat.com)
 
