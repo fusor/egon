@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.date          = Date.today.to_s
   s.license       = 'GPL-3.0+'
 
-  s.files         = Dir['**/*']
+  s.files         = Dir['lib/**/*'] + ["LICENSE", "Rakefile", "README.md"]
   s.test_files    = Dir['{test,spec,features}/**/*']
   s.executables   = Dir['bin/*'].map{ |f| File.basename(f) }
 
