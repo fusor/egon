@@ -274,7 +274,7 @@ module Egon
       end
 
       POST_INSTALL_8 = "
-      sudo setenforce permissive
+      sudo setenforce enforcing
       source ~/stackrc
 
       sudo yum install -y rhosp-director-images
