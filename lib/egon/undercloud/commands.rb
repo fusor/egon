@@ -311,7 +311,7 @@ module Egon
 
       # Temporarily deal with BZ#1319795
       retry_count=0
-      while ! systemctl is-active openstack-swift-* >/dev/null && (( retry_count < retries )); do
+      while ! systemctl is-active openstack-swift-* --all >/dev/null && (( retry_count < retries )); do
         echo \"Swift services not started, retrying.\"
         let retry_count+=1; sudo openstack-service restart swift; sleep 60;
       done
