@@ -8,7 +8,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 Gem::Specification.new do |s|
   s.name          = "egon"
   s.version       = Egon::VERSION
-  s.authors	  = ['Egon and Fusor team']
+  s.authors	      = ['Egon and Fusor team']
   s.email         = ['foreman-dev+egon@googlegroups.com']
   s.summary       = %q{A library on top of Fog that encapsulates TripleO deployment operations}
   s.description   = %q{}
