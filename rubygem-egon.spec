@@ -13,7 +13,8 @@ URL: https://github.com/fusor/egon
 Source0: https://rubygems.org/gems/%{gem_name}-%{version}.gem
 BuildRequires: %{?scl_prefix}rubygems-devel
 Requires: %{?scl_prefix}ruby
-Requires: %{?scl_prefix}rubygem(fog) => 1.36.0
+Requires: %{?scl_prefix}rubygem(fog-core) => 1.43.0
+Requires: %{?scl_prefix}rubygem(fog-openstack) => 0.1.15
 Requires: %{?scl_prefix}rubygem(net-ssh) => 2.9.2
 Requires: %{?scl_prefix}rubygem(net-ssh) < 2.10
 BuildArch: noarch

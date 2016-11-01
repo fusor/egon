@@ -24,7 +24,8 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "bundler", "~> 1.7"
   s.add_development_dependency "rake", "~> 10.0"
-  s.add_development_dependency "fog", "~> 1.36.0"
+  s.add_development_dependency "fog-core", "~> 1.43.0"
+  s.add_development_dependency "fog-openstack", "~> 0.1.15"
   s.add_development_dependency "net-ssh", "~> 2.9.2"
   s.add_development_dependency "rspec", "~> 3.2.0"
 end
