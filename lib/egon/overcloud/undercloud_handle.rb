@@ -1,4 +1,4 @@
-require 'fog'
+require 'fog/openstack'
 require_relative 'undercloud_handle/deployment'
 require_relative 'undercloud_handle/flavor'
 require_relative 'undercloud_handle/image'
