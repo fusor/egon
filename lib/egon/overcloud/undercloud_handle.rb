@@ -1,4 +1,5 @@
 require 'fog/openstack'
+require 'json'
 require_relative 'undercloud_handle/deployment'
 require_relative 'undercloud_handle/flavor'
 require_relative 'undercloud_handle/image'
@@ -37,6 +38,10 @@ module Overcloud
         raise "Executing workflow #{workflow} on #{input} failed: #{response.body['output']}"
       end
       workflow_execution_id
+    end
+
+    def workflow_action_execution(action_name, params = {})
+      return JSON.parse(service('Workflow').create_action_execution(action_name, params).body["output"])["result"]
     end
 
     private
