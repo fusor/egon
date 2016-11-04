@@ -18,7 +18,27 @@ module Overcloud
       @auth_url = auth_url
       @port = port
     end
-    
+
+    def execute_workflow(workflow, input, wait_for_complete = true)
+      connection = service('Workflow')
+      response = connection.create_execution(workflow, input)
+      state = response.body['state']
+      workflow_execution_id = response.body['id']
+
+      return unless wait_for_complete
+
+      while state == 'RUNNING'
+        sleep 2
+        response = connection.get_execution(workflow_execution_id)
+        state = response.body['state']
+      end
+
+      if state != 'SUCCESS'
+        raise "Executing workflow #{workflow} on #{input} failed: #{response.body['output']}"
+      end
+      workflow_execution_id
+    end
+
     private
     
     def service(service_name)
@@ -32,6 +52,8 @@ module Overcloud
       
       if service_name == 'Planning'
         return Fog::Openstack.const_get(service_name).new(fog_parameters)
+      elsif service_name == 'Workflow'
+        return Fog::Workflow::OpenStack.new(fog_parameters)
       end
       return Fog.const_get(service_name).new(fog_parameters)
     end
