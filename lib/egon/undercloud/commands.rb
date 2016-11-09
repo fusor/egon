@@ -4,23 +4,34 @@ module Egon
   module Undercloud
     class Commands
 
-      ## OSP7
-
-      def self.OSP7_satellite(satellite_url, org, activation_key)
+      ## OSP Common
+      def self.OSP_common_satellite(satellite_url, org, activation_key)
         return "
         curl -k -O #{satellite_url}/pub/katello-ca-consumer-latest.noarch.rpm
         sudo yum install -y katello-ca-consumer-latest.noarch.rpm
-        sudo subscription-manager register --org=\"#{org}\" --activationkey=\"#{activation_key}\"
-        #{self.OSP7_no_registration}"
+        sudo subscription-manager register --org=\"#{org}\" --activationkey=\"#{activation_key}\""
       end
-    
-      def self.OSP7_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)
+
+      def self.OSP_common_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)
         return "
         sudo subscription-manager register --force --username=\"#{rhsm_user}\" --password=\"#{rhsm_password}\"
         sudo subscription-manager attach --pool=\"#{rhsm_pool_id}\"
         sudo subscription-manager repos --enable=rhel-7-server-rpms \
          --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-extras-rpms \
-         --enable=rhel-7-server-openstack-6.0-rpms
+         --enable=rhel-7-server-openstack-6.0-rpms"
+      end
+
+      ## OSP7
+
+      def self.OSP7_satellite(satellite_url, org, activation_key)
+        return "
+        #{self.OSP_common_satellite(satellite_url, org, activation_key)}
+        #{self.OSP7_no_registration}"
+      end
+    
+      def self.OSP7_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)
+        return "
+        #{self.OSP_common_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)}
         #{self.OSP7_no_registration}"
       end
     
@@ -244,19 +255,13 @@ module Egon
 
       def self.OSP8_satellite(satellite_url, org, activation_key)
         return "
-        curl -k -O #{satellite_url}/pub/katello-ca-consumer-latest.noarch.rpm
-        sudo yum install -y katello-ca-consumer-latest.noarch.rpm
-        sudo subscription-manager register --org=\"#{org}\" --activationkey=\"#{activation_key}\"
+        #{self.OSP_common_satellite(satellite_url, org, activation_key)}
         #{self.OSP8_no_registration}"
       end
     
       def self.OSP8_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)
         return "
-        sudo subscription-manager register --force --username=\"#{rhsm_user}\" --password=\"#{rhsm_password}\"
-        sudo subscription-manager attach --pool=\"#{rhsm_pool_id}\"
-        sudo subscription-manager repos --enable=rhel-7-server-rpms \
-         --enable=rhel-7-server-optional-rpms --enable=rhel-7-server-extras-rpms \
-         --enable=rhel-7-server-openstack-6.0-rpms
+        #{self.OSP_common_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)}
         #{self.OSP8_no_registration}"
       end
     
@@ -407,6 +412,101 @@ EOF
       openstack undercloud install
       #{POST_INSTALL_8}"
 
+      ## OSP10
+
+      def self.OSP10_satellite(satellite_url, org, activation_key)
+        return "
+        #{self.OSP_common_satellite(satellite_url, org, activation_key)}
+        #{self.OSP10_no_registration}"
+      end
+    
+      def self.OSP10_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)
+        return "
+        #{self.OSP_common_vanilla_rhel(rhsm_user, rhsm_password, rhsm_pool_id)}
+        #{self.OSP10_no_registration}"
+      end
+    
+      def self.OSP10_no_registration
+        return "
+        if [ ! -f ~/undercloud.conf ]; then
+          cp -f /usr/share/instack-undercloud/undercloud.conf.sample ~/undercloud.conf;
+        fi
+        sed -i -- 's/#store_events = false/store_events = true/g' ~/undercloud.conf
+        sed -i -- 's/#enable_telemetry = false/enable_telemetry = true/g' ~/undercloud.conf
+        #{self.OSP10_no_registration_no_packages}"
+      end
+
+      def self.OSP10_no_registration_no_packages
+        return OSP10_COMMON
+      end
+
+      POST_INSTALL_10 = "
+      sudo setenforce permissive
+      source ~/stackrc
+
+      sudo yum install -y rhosp-director-images
+      cd /usr/share/rhosp-director-images
+      sudo tar xf ironic-python-agent.tar
+      sudo tar xf overcloud-full.tar
+      openstack overcloud image upload
+      cd ~
+
+      SUBNET_ID=$(neutron subnet-show ''  | awk '$2==\"id\" {print $4}')
+      neutron subnet-update $SUBNET_ID --dns-nameserver 192.168.122.1
+
+      openstack action execution run tripleo.plan.delete '{\"container\": \"overcloud\"}'
+
+      cp -r /usr/share/openstack-tripleo-heat-templates .
+      cat << 'EOF' >> openstack-tripleo-heat-templates/capabilities-map.yaml
+
+  - title: TLS
+    description:
+    environment_groups:
+      - title: TLS
+        description: >
+          Enable TLS
+        environments:
+          - file: environments/enable-tls.yaml
+            title: Enable TLS
+            description:
+            requires:
+              - ../puppet/extraconfig/tls/tls-cert-inject.yaml
+          - file: environments/inject-trust-anchor.yaml
+            title: Inject CA
+            description:
+            requires:
+              - ../puppet/extraconfig/tls/tls-cert-inject.yaml
+
+  - title: Registration
+    description:
+    environment_groups:
+      - title: Registration
+        description: >
+          Register the Overcloud to CDN or Satellite
+        environments:
+          - file: environments/rhel-registration.yaml
+            title: RHEL Registration
+            description:
+            requires:
+              - extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml
+EOF
+
+      cat openstack-tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml > openstack-tripleo-heat-templates/environments/rhel-registration.yaml
+      cat openstack-tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/environment-rhel-registration.yaml >> openstack-tripleo-heat-templates/environments/rhel-registration.yaml
+      sed -i 's,rhel-registration.yaml,../extraconfig/pre_deploy/rhel-registration/rhel-registration.yaml,g' openstack-tripleo-heat-templates/environments/rhel-registration.yaml
+
+      openstack action execution run tripleo.plan.create_container '{\"container\": \"overcloud\"}'
+      cd openstack-tripleo-heat-templates
+      swift upload overcloud *
+      cd ..
+      openstack workflow execution create tripleo.plan_management.v1.create_deployment_plan '{\"container\": \"overcloud\"}'
+      "
+
+      OSP10_COMMON = "
+      sudo sed -i '/^net.ipv4.ip_forward =/{h;s/=.*/= 1/};${x;/^$/{s//net.ipv4.ip_forward = 1/;H};x}' /etc/sysctl.conf
+      sudo sysctl -p /etc/sysctl.conf
+      openstack undercloud install
+      #{POST_INSTALL_10}"
     end
   end  
 end
