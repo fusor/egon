@@ -111,7 +111,11 @@ module Overcloud
       }
       if node_parameters[:driver] == 'pxe_ssh'
         json['pm_user'] = node_parameters[:driver_info][:ssh_username]
-        json['pm_password'] = node_parameters[:driver_info][:ssh_key_contents]
+        if node_parameters[:driver_info][:ssh_password]
+          json['pm_password'] = node_parameters[:driver_info][:ssh_password]
+        elsif node_parameters[:driver_info][:ssh_key_contents]
+          json['pm_password'] = node_parameters[:driver_info][:ssh_key_contents]
+        end
         json['pm_addr'] = node_parameters[:driver_info][:ssh_address]
       elsif node_parameters[:driver] == 'pxe_impitool'
         json['pm_user'] = node_parameters[:driver_info][:ipmi_username]
