@@ -117,12 +117,12 @@ module Overcloud
           json['pm_password'] = node_parameters[:driver_info][:ssh_key_contents]
         end
         json['pm_addr'] = node_parameters[:driver_info][:ssh_address]
-      elsif node_parameters[:driver] == 'pxe_impitool'
+      elsif node_parameters[:driver] == 'pxe_ipmitool'
         json['pm_user'] = node_parameters[:driver_info][:ipmi_username]
         json['pm_password'] = node_parameters[:driver_info][:ipmi_password]
         json['pm_addr'] = node_parameters[:driver_info][:ipmi_address]
       else
-        raise "Unknown node driver: #{driver}"
+        raise "Unknown node driver: #{node_parameters[:driver]}"
       end
       [json]
     end
