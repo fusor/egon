@@ -494,6 +494,7 @@ EOF
       cat openstack-tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/rhel-registration-resource-registry.yaml > openstack-tripleo-heat-templates/environments/rhel-registration.yaml
       cat openstack-tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/environment-rhel-registration.yaml >> openstack-tripleo-heat-templates/environments/rhel-registration.yaml
       sed -i 's,rhel-registration.yaml,../extraconfig/pre_deploy/rhel-registration/rhel-registration.yaml,g' openstack-tripleo-heat-templates/environments/rhel-registration.yaml
+      sed -i 's,            rpm -Uvh katello-ca-consumer-latest.noarch.rpm || true,            rpm -Uvh katello-ca-consumer-latest.noarch.rpm || true\\n            echo \"\{\"network.hostname\":\"$HOSTNAME\"\}\" > /etc/rhsm/facts/katello.facts,' openstack-tripleo-heat-templates/extraconfig/pre_deploy/rhel-registration/scripts/rhel-registration
 
       openstack action execution run tripleo.plan.create_container '{\"container\": \"overcloud\"}'
       cd openstack-tripleo-heat-templates
