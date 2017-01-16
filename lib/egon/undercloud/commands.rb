@@ -441,7 +441,7 @@ EOF
       end
 
       POST_INSTALL_10 = "
-      sudo setenforce permissive
+      sudo setenforce enforcing
       source ~/stackrc
 
       sudo yum install -y rhosp-director-images
